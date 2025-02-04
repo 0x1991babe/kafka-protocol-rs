@@ -17,53 +17,53 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct BrokerRegistrationRequest {
     /// The broker ID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub broker_id: super::BrokerId,
 
     /// The cluster id of the broker process.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub cluster_id: StrBytes,
 
     /// The incarnation id of the broker process.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub incarnation_id: Uuid,
 
     /// The listeners of this broker
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub listeners: Vec<Listener>,
 
-    /// The features on this broker
+    /// The features on this broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub features: Vec<Feature>,
 
     /// The rack which this broker is in.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub rack: Option<StrBytes>,
 
     /// If the required configurations for ZK migration are present, this value is set to true
     ///
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1-4
     pub is_migrating_zk_broker: bool,
 
     /// Log directories configured in this broker which are available.
     ///
-    /// Supported API versions: 2-3
+    /// Supported API versions: 2-4
     pub log_dirs: Vec<Uuid>,
 
     /// The epoch before a clean shutdown.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub previous_broker_epoch: i64,
 
     /// Other tagged fields
@@ -75,7 +75,7 @@ impl BrokerRegistrationRequest {
     ///
     /// The broker ID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
         self.broker_id = value;
         self
@@ -84,7 +84,7 @@ impl BrokerRegistrationRequest {
     ///
     /// The cluster id of the broker process.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_cluster_id(mut self, value: StrBytes) -> Self {
         self.cluster_id = value;
         self
@@ -93,7 +93,7 @@ impl BrokerRegistrationRequest {
     ///
     /// The incarnation id of the broker process.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_incarnation_id(mut self, value: Uuid) -> Self {
         self.incarnation_id = value;
         self
@@ -102,16 +102,16 @@ impl BrokerRegistrationRequest {
     ///
     /// The listeners of this broker
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
         self.listeners = value;
         self
     }
     /// Sets `features` to the passed value.
     ///
-    /// The features on this broker
+    /// The features on this broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_features(mut self, value: Vec<Feature>) -> Self {
         self.features = value;
         self
@@ -120,7 +120,7 @@ impl BrokerRegistrationRequest {
     ///
     /// The rack which this broker is in.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
         self.rack = value;
         self
@@ -129,7 +129,7 @@ impl BrokerRegistrationRequest {
     ///
     /// If the required configurations for ZK migration are present, this value is set to true
     ///
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1-4
     pub fn with_is_migrating_zk_broker(mut self, value: bool) -> Self {
         self.is_migrating_zk_broker = value;
         self
@@ -138,7 +138,7 @@ impl BrokerRegistrationRequest {
     ///
     /// Log directories configured in this broker which are available.
     ///
-    /// Supported API versions: 2-3
+    /// Supported API versions: 2-4
     pub fn with_log_dirs(mut self, value: Vec<Uuid>) -> Self {
         self.log_dirs = value;
         self
@@ -147,7 +147,7 @@ impl BrokerRegistrationRequest {
     ///
     /// The epoch before a clean shutdown.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_previous_broker_epoch(mut self, value: i64) -> Self {
         self.previous_broker_epoch = value;
         self
@@ -300,27 +300,27 @@ impl Default for BrokerRegistrationRequest {
 }
 
 impl Message for BrokerRegistrationRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Feature {
     /// The feature name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub name: StrBytes,
 
     /// The minimum supported feature level.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub min_supported_version: i16,
 
     /// The maximum supported feature level.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub max_supported_version: i16,
 
     /// Other tagged fields
@@ -332,7 +332,7 @@ impl Feature {
     ///
     /// The feature name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_name(mut self, value: StrBytes) -> Self {
         self.name = value;
         self
@@ -341,7 +341,7 @@ impl Feature {
     ///
     /// The minimum supported feature level.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_min_supported_version(mut self, value: i16) -> Self {
         self.min_supported_version = value;
         self
@@ -350,7 +350,7 @@ impl Feature {
     ///
     /// The maximum supported feature level.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_max_supported_version(mut self, value: i16) -> Self {
         self.max_supported_version = value;
         self
@@ -439,32 +439,32 @@ impl Default for Feature {
 }
 
 impl Message for Feature {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Listener {
     /// The name of the endpoint.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub name: StrBytes,
 
     /// The hostname.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub host: StrBytes,
 
     /// The port.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub port: u16,
 
     /// The security protocol.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub security_protocol: i16,
 
     /// Other tagged fields
@@ -476,7 +476,7 @@ impl Listener {
     ///
     /// The name of the endpoint.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_name(mut self, value: StrBytes) -> Self {
         self.name = value;
         self
@@ -485,7 +485,7 @@ impl Listener {
     ///
     /// The hostname.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -494,7 +494,7 @@ impl Listener {
     ///
     /// The port.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_port(mut self, value: u16) -> Self {
         self.port = value;
         self
@@ -503,7 +503,7 @@ impl Listener {
     ///
     /// The security protocol.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_security_protocol(mut self, value: i16) -> Self {
         self.security_protocol = value;
         self
@@ -597,7 +597,7 @@ impl Default for Listener {
 }
 
 impl Message for Listener {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

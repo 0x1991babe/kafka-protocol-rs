@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ApiVersionsRequest {
     /// The name of the client.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub client_software_name: StrBytes,
 
     /// The version of the client.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub client_software_version: StrBytes,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl ApiVersionsRequest {
     ///
     /// The name of the client.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_client_software_name(mut self, value: StrBytes) -> Self {
         self.client_software_name = value;
         self
@@ -49,7 +49,7 @@ impl ApiVersionsRequest {
     ///
     /// The version of the client.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_client_software_version(mut self, value: StrBytes) -> Self {
         self.client_software_version = value;
         self
@@ -155,7 +155,7 @@ impl Default for ApiVersionsRequest {
 }
 
 impl Message for ApiVersionsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -1,6 +1,6 @@
-//! LeaderChangeMessage
+//! AddRaftVoterRequest
 //!
-//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/LeaderChangeMessage.json).
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/AddRaftVoterRequest.json).
 // WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
@@ -17,198 +17,83 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct LeaderChangeMessage {
-    /// The version of the leader change message
+pub struct AddRaftVoterRequest {
     ///
-    /// Supported API versions: 0-1
-    pub version: i16,
+    ///
+    /// Supported API versions: 0
+    pub cluster_id: Option<StrBytes>,
 
-    /// The ID of the newly elected leader
     ///
-    /// Supported API versions: 0-1
-    pub leader_id: super::BrokerId,
+    ///
+    /// Supported API versions: 0
+    pub timeout_ms: i32,
 
-    /// The set of voters in the quorum for this epoch
+    /// The replica id of the voter getting added to the topic partition
     ///
-    /// Supported API versions: 0-1
-    pub voters: Vec<Voter>,
-
-    /// The voters who voted for the leader at the time of election
-    ///
-    /// Supported API versions: 0-1
-    pub granting_voters: Vec<Voter>,
-
-    /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
-}
-
-impl LeaderChangeMessage {
-    /// Sets `version` to the passed value.
-    ///
-    /// The version of the leader change message
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_version(mut self, value: i16) -> Self {
-        self.version = value;
-        self
-    }
-    /// Sets `leader_id` to the passed value.
-    ///
-    /// The ID of the newly elected leader
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
-        self.leader_id = value;
-        self
-    }
-    /// Sets `voters` to the passed value.
-    ///
-    /// The set of voters in the quorum for this epoch
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_voters(mut self, value: Vec<Voter>) -> Self {
-        self.voters = value;
-        self
-    }
-    /// Sets `granting_voters` to the passed value.
-    ///
-    /// The voters who voted for the leader at the time of election
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_granting_voters(mut self, value: Vec<Voter>) -> Self {
-        self.granting_voters = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
-    }
-}
-
-impl Encodable for LeaderChangeMessage {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        types::Int16.encode(buf, &self.version)?;
-        types::Int32.encode(buf, &self.leader_id)?;
-        types::CompactArray(types::Struct { version }).encode(buf, &self.voters)?;
-        types::CompactArray(types::Struct { version }).encode(buf, &self.granting_voters)?;
-        let num_tagged_fields = self.unknown_tagged_fields.len();
-        if num_tagged_fields > std::u32::MAX as usize {
-            bail!(
-                "Too many tagged fields to encode ({} fields)",
-                num_tagged_fields
-            );
-        }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize> {
-        let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.version)?;
-        total_size += types::Int32.compute_size(&self.leader_id)?;
-        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.voters)?;
-        total_size +=
-            types::CompactArray(types::Struct { version }).compute_size(&self.granting_voters)?;
-        let num_tagged_fields = self.unknown_tagged_fields.len();
-        if num_tagged_fields > std::u32::MAX as usize {
-            bail!(
-                "Too many tagged fields to encode ({} fields)",
-                num_tagged_fields
-            );
-        }
-        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
-        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
-        Ok(total_size)
-    }
-}
-
-impl Decodable for LeaderChangeMessage {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        let version = types::Int16.decode(buf)?;
-        let leader_id = types::Int32.decode(buf)?;
-        let voters = types::CompactArray(types::Struct { version }).decode(buf)?;
-        let granting_voters = types::CompactArray(types::Struct { version }).decode(buf)?;
-        let mut unknown_tagged_fields = BTreeMap::new();
-        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
-        for _ in 0..num_tagged_fields {
-            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
-            let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let unknown_value = buf.try_get_bytes(size as usize)?;
-            unknown_tagged_fields.insert(tag as i32, unknown_value);
-        }
-        Ok(Self {
-            version,
-            leader_id,
-            voters,
-            granting_voters,
-            unknown_tagged_fields,
-        })
-    }
-}
-
-impl Default for LeaderChangeMessage {
-    fn default() -> Self {
-        Self {
-            version: 0,
-            leader_id: (0).into(),
-            voters: Default::default(),
-            granting_voters: Default::default(),
-            unknown_tagged_fields: BTreeMap::new(),
-        }
-    }
-}
-
-impl Message for LeaderChangeMessage {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
-}
-
-/// Valid versions: 0-1
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
-pub struct Voter {
-    ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0
     pub voter_id: i32,
 
-    /// The directory id of the voter
+    /// The directory id of the voter getting added to the topic partition
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 0
     pub voter_directory_id: Uuid,
+
+    /// The endpoints that can be used to communicate with the voter
+    ///
+    /// Supported API versions: 0
+    pub listeners: Vec<Listener>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Voter {
+impl AddRaftVoterRequest {
+    /// Sets `cluster_id` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
+        self.cluster_id = value;
+        self
+    }
+    /// Sets `timeout_ms` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_timeout_ms(mut self, value: i32) -> Self {
+        self.timeout_ms = value;
+        self
+    }
     /// Sets `voter_id` to the passed value.
     ///
+    /// The replica id of the voter getting added to the topic partition
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0
     pub fn with_voter_id(mut self, value: i32) -> Self {
         self.voter_id = value;
         self
     }
     /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The directory id of the voter
+    /// The directory id of the voter getting added to the topic partition
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 0
     pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
         self.voter_directory_id = value;
+        self
+    }
+    /// Sets `listeners` to the passed value.
+    ///
+    /// The endpoints that can be used to communicate with the voter
+    ///
+    /// Supported API versions: 0
+    pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
+        self.listeners = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -223,16 +108,14 @@ impl Voter {
     }
 }
 
-impl Encodable for Voter {
+#[cfg(feature = "client")]
+impl Encodable for AddRaftVoterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.cluster_id)?;
+        types::Int32.encode(buf, &self.timeout_ms)?;
         types::Int32.encode(buf, &self.voter_id)?;
-        if version >= 1 {
-            types::Uuid.encode(buf, &self.voter_directory_id)?;
-        } else {
-            if &self.voter_directory_id != &Uuid::nil() {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        types::Uuid.encode(buf, &self.voter_directory_id)?;
+        types::CompactArray(types::Struct { version }).encode(buf, &self.listeners)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -247,14 +130,12 @@ impl Encodable for Voter {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
+        total_size += types::CompactString.compute_size(&self.cluster_id)?;
+        total_size += types::Int32.compute_size(&self.timeout_ms)?;
         total_size += types::Int32.compute_size(&self.voter_id)?;
-        if version >= 1 {
-            total_size += types::Uuid.compute_size(&self.voter_directory_id)?;
-        } else {
-            if &self.voter_directory_id != &Uuid::nil() {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        total_size += types::Uuid.compute_size(&self.voter_directory_id)?;
+        total_size +=
+            types::CompactArray(types::Struct { version }).compute_size(&self.listeners)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -269,14 +150,14 @@ impl Encodable for Voter {
     }
 }
 
-impl Decodable for Voter {
+#[cfg(feature = "broker")]
+impl Decodable for AddRaftVoterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let cluster_id = types::CompactString.decode(buf)?;
+        let timeout_ms = types::Int32.decode(buf)?;
         let voter_id = types::Int32.decode(buf)?;
-        let voter_directory_id = if version >= 1 {
-            types::Uuid.decode(buf)?
-        } else {
-            Uuid::nil()
-        };
+        let voter_directory_id = types::Uuid.decode(buf)?;
+        let listeners = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -286,24 +167,175 @@ impl Decodable for Voter {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
+            cluster_id,
+            timeout_ms,
             voter_id,
             voter_directory_id,
+            listeners,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for Voter {
+impl Default for AddRaftVoterRequest {
     fn default() -> Self {
         Self {
+            cluster_id: Some(Default::default()),
+            timeout_ms: 0,
             voter_id: 0,
             voter_directory_id: Uuid::nil(),
+            listeners: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for Voter {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+impl Message for AddRaftVoterRequest {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+/// Valid versions: 0
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq)]
+pub struct Listener {
+    /// The name of the endpoint
+    ///
+    /// Supported API versions: 0
+    pub name: StrBytes,
+
+    /// The hostname
+    ///
+    /// Supported API versions: 0
+    pub host: StrBytes,
+
+    /// The port
+    ///
+    /// Supported API versions: 0
+    pub port: u16,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl Listener {
+    /// Sets `name` to the passed value.
+    ///
+    /// The name of the endpoint
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `host` to the passed value.
+    ///
+    /// The hostname
+    ///
+    /// Supported API versions: 0
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `port` to the passed value.
+    ///
+    /// The port
+    ///
+    /// Supported API versions: 0
+    pub fn with_port(mut self, value: u16) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
+    }
+}
+
+#[cfg(feature = "client")]
+impl Encodable for Listener {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.name)?;
+        types::CompactString.encode(buf, &self.host)?;
+        types::UInt16.encode(buf, &self.port)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize> {
+        let mut total_size = 0;
+        total_size += types::CompactString.compute_size(&self.name)?;
+        total_size += types::CompactString.compute_size(&self.host)?;
+        total_size += types::UInt16.compute_size(&self.port)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        Ok(total_size)
+    }
+}
+
+#[cfg(feature = "broker")]
+impl Decodable for Listener {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = types::CompactString.decode(buf)?;
+        let host = types::CompactString.decode(buf)?;
+        let port = types::UInt16.decode(buf)?;
+        let mut unknown_tagged_fields = BTreeMap::new();
+        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+        for _ in 0..num_tagged_fields {
+            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+            let size: u32 = types::UnsignedVarInt.decode(buf)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
+            unknown_tagged_fields.insert(tag as i32, unknown_value);
+        }
+        Ok(Self {
+            name,
+            host,
+            port,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for Listener {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            host: Default::default(),
+            port: 0,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for Listener {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+impl HeaderVersion for AddRaftVoterRequest {
+    fn header_version(version: i16) -> i16 {
+        2
+    }
 }

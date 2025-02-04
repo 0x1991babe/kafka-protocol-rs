@@ -182,7 +182,7 @@ pub struct CreatableTopic {
     /// The custom topic configurations to set.
     ///
     /// Supported API versions: 0-7
-    pub configs: Vec<CreateableTopicConfig>,
+    pub configs: Vec<CreatableTopicConfig>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -230,7 +230,7 @@ impl CreatableTopic {
     /// The custom topic configurations to set.
     ///
     /// Supported API versions: 0-7
-    pub fn with_configs(mut self, value: Vec<CreateableTopicConfig>) -> Self {
+    pub fn with_configs(mut self, value: Vec<CreatableTopicConfig>) -> Self {
         self.configs = value;
         self
     }
@@ -373,6 +373,156 @@ impl Default for CreatableTopic {
 }
 
 impl Message for CreatableTopic {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+}
+
+/// Valid versions: 0-7
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq)]
+pub struct CreatableTopicConfig {
+    /// The configuration name.
+    ///
+    /// Supported API versions: 0-7
+    pub name: StrBytes,
+
+    /// The configuration value.
+    ///
+    /// Supported API versions: 0-7
+    pub value: Option<StrBytes>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl CreatableTopicConfig {
+    /// Sets `name` to the passed value.
+    ///
+    /// The configuration name.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `value` to the passed value.
+    ///
+    /// The configuration value.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
+        self.value = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
+    }
+}
+
+#[cfg(feature = "client")]
+impl Encodable for CreatableTopicConfig {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version >= 5 {
+            types::CompactString.encode(buf, &self.name)?;
+        } else {
+            types::String.encode(buf, &self.name)?;
+        }
+        if version >= 5 {
+            types::CompactString.encode(buf, &self.value)?;
+        } else {
+            types::String.encode(buf, &self.value)?;
+        }
+        if version >= 5 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize> {
+        let mut total_size = 0;
+        if version >= 5 {
+            total_size += types::CompactString.compute_size(&self.name)?;
+        } else {
+            total_size += types::String.compute_size(&self.name)?;
+        }
+        if version >= 5 {
+            total_size += types::CompactString.compute_size(&self.value)?;
+        } else {
+            total_size += types::String.compute_size(&self.value)?;
+        }
+        if version >= 5 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+#[cfg(feature = "broker")]
+impl Decodable for CreatableTopicConfig {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 5 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let value = if version >= 5 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 5 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            name,
+            value,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for CreatableTopicConfig {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            value: Some(Default::default()),
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for CreatableTopicConfig {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
 }
@@ -547,156 +697,6 @@ impl Default for CreateTopicsRequest {
 }
 
 impl Message for CreateTopicsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
-}
-
-/// Valid versions: 0-7
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
-pub struct CreateableTopicConfig {
-    /// The configuration name.
-    ///
-    /// Supported API versions: 0-7
-    pub name: StrBytes,
-
-    /// The configuration value.
-    ///
-    /// Supported API versions: 0-7
-    pub value: Option<StrBytes>,
-
-    /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
-}
-
-impl CreateableTopicConfig {
-    /// Sets `name` to the passed value.
-    ///
-    /// The configuration name.
-    ///
-    /// Supported API versions: 0-7
-    pub fn with_name(mut self, value: StrBytes) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `value` to the passed value.
-    ///
-    /// The configuration value.
-    ///
-    /// Supported API versions: 0-7
-    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
-        self.value = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
-    }
-}
-
-#[cfg(feature = "client")]
-impl Encodable for CreateableTopicConfig {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version >= 5 {
-            types::CompactString.encode(buf, &self.name)?;
-        } else {
-            types::String.encode(buf, &self.name)?;
-        }
-        if version >= 5 {
-            types::CompactString.encode(buf, &self.value)?;
-        } else {
-            types::String.encode(buf, &self.value)?;
-        }
-        if version >= 5 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
-            if num_tagged_fields > std::u32::MAX as usize {
-                bail!(
-                    "Too many tagged fields to encode ({} fields)",
-                    num_tagged_fields
-                );
-            }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
-        }
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize> {
-        let mut total_size = 0;
-        if version >= 5 {
-            total_size += types::CompactString.compute_size(&self.name)?;
-        } else {
-            total_size += types::String.compute_size(&self.name)?;
-        }
-        if version >= 5 {
-            total_size += types::CompactString.compute_size(&self.value)?;
-        } else {
-            total_size += types::String.compute_size(&self.value)?;
-        }
-        if version >= 5 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
-            if num_tagged_fields > std::u32::MAX as usize {
-                bail!(
-                    "Too many tagged fields to encode ({} fields)",
-                    num_tagged_fields
-                );
-            }
-            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
-            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
-        }
-        Ok(total_size)
-    }
-}
-
-#[cfg(feature = "broker")]
-impl Decodable for CreateableTopicConfig {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        let name = if version >= 5 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
-        let value = if version >= 5 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
-        let mut unknown_tagged_fields = BTreeMap::new();
-        if version >= 5 {
-            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
-            for _ in 0..num_tagged_fields {
-                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
-                let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let unknown_value = buf.try_get_bytes(size as usize)?;
-                unknown_tagged_fields.insert(tag as i32, unknown_value);
-            }
-        }
-        Ok(Self {
-            name,
-            value,
-            unknown_tagged_fields,
-        })
-    }
-}
-
-impl Default for CreateableTopicConfig {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            value: Some(Default::default()),
-            unknown_tagged_fields: BTreeMap::new(),
-        }
-    }
-}
-
-impl Message for CreateableTopicConfig {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
 }

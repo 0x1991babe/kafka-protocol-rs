@@ -17,38 +17,38 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Coordinator {
     /// The coordinator key.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub key: StrBytes,
 
     /// The node id.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub node_id: super::BrokerId,
 
     /// The host name.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub host: StrBytes,
 
     /// The port.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub port: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
@@ -60,7 +60,7 @@ impl Coordinator {
     ///
     /// The coordinator key.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_key(mut self, value: StrBytes) -> Self {
         self.key = value;
         self
@@ -69,7 +69,7 @@ impl Coordinator {
     ///
     /// The node id.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
         self.node_id = value;
         self
@@ -78,7 +78,7 @@ impl Coordinator {
     ///
     /// The host name.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -87,7 +87,7 @@ impl Coordinator {
     ///
     /// The port.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_port(mut self, value: i32) -> Self {
         self.port = value;
         self
@@ -96,7 +96,7 @@ impl Coordinator {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -105,7 +105,7 @@ impl Coordinator {
     ///
     /// The error message, or null if there was no error.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
         self.error_message = value;
         self
@@ -303,17 +303,17 @@ impl Default for Coordinator {
 }
 
 impl Message for Coordinator {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FindCoordinatorResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-5
+    /// Supported API versions: 1-6
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
@@ -343,7 +343,7 @@ pub struct FindCoordinatorResponse {
 
     /// Each coordinator result in the response
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub coordinators: Vec<Coordinator>,
 
     /// Other tagged fields
@@ -355,7 +355,7 @@ impl FindCoordinatorResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-5
+    /// Supported API versions: 1-6
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -409,7 +409,7 @@ impl FindCoordinatorResponse {
     ///
     /// Each coordinator result in the response
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_coordinators(mut self, value: Vec<Coordinator>) -> Self {
         self.coordinators = value;
         self
@@ -645,7 +645,7 @@ impl Default for FindCoordinatorResponse {
 }
 
 impl Message for FindCoordinatorResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

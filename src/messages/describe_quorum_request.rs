@@ -17,13 +17,13 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeQuorumRequest {
     ///
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topics: Vec<TopicData>,
 
     /// Other tagged fields
@@ -35,7 +35,7 @@ impl DescribeQuorumRequest {
     ///
     ///
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
         self.topics = value;
         self
@@ -114,17 +114,17 @@ impl Default for DescribeQuorumRequest {
 }
 
 impl Message for DescribeQuorumRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
     /// The partition index.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partition_index: i32,
 
     /// Other tagged fields
@@ -136,7 +136,7 @@ impl PartitionData {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -215,22 +215,22 @@ impl Default for PartitionData {
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
     /// The topic name.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topic_name: super::TopicName,
 
     ///
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -242,7 +242,7 @@ impl TopicData {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
         self.topic_name = value;
         self
@@ -251,7 +251,7 @@ impl TopicData {
     ///
     ///
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
         self.partitions = value;
         self
@@ -336,7 +336,7 @@ impl Default for TopicData {
 }
 
 impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

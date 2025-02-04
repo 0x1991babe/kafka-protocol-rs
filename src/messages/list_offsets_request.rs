@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-8
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsPartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub partition_index: i32,
 
     /// The current leader epoch.
     ///
-    /// Supported API versions: 4-8
+    /// Supported API versions: 4-9
     pub current_leader_epoch: i32,
 
     /// The current timestamp.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub timestamp: i64,
 
     /// The maximum number of offsets to report.
@@ -50,7 +50,7 @@ impl ListOffsetsPartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -59,7 +59,7 @@ impl ListOffsetsPartition {
     ///
     /// The current leader epoch.
     ///
-    /// Supported API versions: 4-8
+    /// Supported API versions: 4-9
     pub fn with_current_leader_epoch(mut self, value: i32) -> Self {
         self.current_leader_epoch = value;
         self
@@ -68,7 +68,7 @@ impl ListOffsetsPartition {
     ///
     /// The current timestamp.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_timestamp(mut self, value: i64) -> Self {
         self.timestamp = value;
         self
@@ -201,27 +201,27 @@ impl Default for ListOffsetsPartition {
 }
 
 impl Message for ListOffsetsPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
-/// Valid versions: 0-8
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsRequest {
     /// The broker ID of the requester, or -1 if this request is being made by a normal consumer.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub replica_id: super::BrokerId,
 
     /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
     ///
-    /// Supported API versions: 2-8
+    /// Supported API versions: 2-9
     pub isolation_level: i8,
 
     /// Each topic in the request.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub topics: Vec<ListOffsetsTopic>,
 
     /// Other tagged fields
@@ -233,7 +233,7 @@ impl ListOffsetsRequest {
     ///
     /// The broker ID of the requester, or -1 if this request is being made by a normal consumer.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
         self.replica_id = value;
         self
@@ -242,7 +242,7 @@ impl ListOffsetsRequest {
     ///
     /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
     ///
-    /// Supported API versions: 2-8
+    /// Supported API versions: 2-9
     pub fn with_isolation_level(mut self, value: i8) -> Self {
         self.isolation_level = value;
         self
@@ -251,7 +251,7 @@ impl ListOffsetsRequest {
     ///
     /// Each topic in the request.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_topics(mut self, value: Vec<ListOffsetsTopic>) -> Self {
         self.topics = value;
         self
@@ -375,22 +375,22 @@ impl Default for ListOffsetsRequest {
 }
 
 impl Message for ListOffsetsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
-/// Valid versions: 0-8
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub name: super::TopicName,
 
     /// Each partition in the request.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub partitions: Vec<ListOffsetsPartition>,
 
     /// Other tagged fields
@@ -402,7 +402,7 @@ impl ListOffsetsTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -411,7 +411,7 @@ impl ListOffsetsTopic {
     ///
     /// Each partition in the request.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_partitions(mut self, value: Vec<ListOffsetsPartition>) -> Self {
         self.partitions = value;
         self
@@ -526,7 +526,7 @@ impl Default for ListOffsetsTopic {
 }
 
 impl Message for ListOffsetsTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 

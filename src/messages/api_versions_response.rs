@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ApiVersion {
     /// The API index.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub api_key: i16,
 
     /// The minimum supported version, inclusive.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub min_version: i16,
 
     /// The maximum supported version, inclusive.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub max_version: i16,
 
     /// Other tagged fields
@@ -45,7 +45,7 @@ impl ApiVersion {
     ///
     /// The API index.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_api_key(mut self, value: i16) -> Self {
         self.api_key = value;
         self
@@ -54,7 +54,7 @@ impl ApiVersion {
     ///
     /// The minimum supported version, inclusive.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_min_version(mut self, value: i16) -> Self {
         self.min_version = value;
         self
@@ -63,7 +63,7 @@ impl ApiVersion {
     ///
     /// The maximum supported version, inclusive.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_max_version(mut self, value: i16) -> Self {
         self.max_version = value;
         self
@@ -158,47 +158,47 @@ impl Default for ApiVersion {
 }
 
 impl Message for ApiVersion {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub error_code: i16,
 
     /// The APIs supported by the broker.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub api_keys: Vec<ApiVersion>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1-4
     pub throttle_time_ms: i32,
 
-    /// Features supported by the broker.
+    /// Features supported by the broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub supported_features: Vec<SupportedFeatureKey>,
 
     /// The monotonically increasing epoch for the finalized features information. Valid values are >= 0. A value of -1 is special and represents unknown epoch.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub finalized_features_epoch: i64,
 
     /// List of cluster-wide finalized features. The information is valid only if FinalizedFeaturesEpoch >= 0.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub finalized_features: Vec<FinalizedFeatureKey>,
 
     /// Set by a KRaft controller if the required configurations for ZK migration are present
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub zk_migration_ready: bool,
 
     /// Other tagged fields
@@ -210,7 +210,7 @@ impl ApiVersionsResponse {
     ///
     /// The top-level error code.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -219,7 +219,7 @@ impl ApiVersionsResponse {
     ///
     /// The APIs supported by the broker.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_api_keys(mut self, value: Vec<ApiVersion>) -> Self {
         self.api_keys = value;
         self
@@ -228,16 +228,16 @@ impl ApiVersionsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1-4
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
     }
     /// Sets `supported_features` to the passed value.
     ///
-    /// Features supported by the broker.
+    /// Features supported by the broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_supported_features(mut self, value: Vec<SupportedFeatureKey>) -> Self {
         self.supported_features = value;
         self
@@ -246,7 +246,7 @@ impl ApiVersionsResponse {
     ///
     /// The monotonically increasing epoch for the finalized features information. Valid values are >= 0. A value of -1 is special and represents unknown epoch.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_finalized_features_epoch(mut self, value: i64) -> Self {
         self.finalized_features_epoch = value;
         self
@@ -255,7 +255,7 @@ impl ApiVersionsResponse {
     ///
     /// List of cluster-wide finalized features. The information is valid only if FinalizedFeaturesEpoch >= 0.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_finalized_features(mut self, value: Vec<FinalizedFeatureKey>) -> Self {
         self.finalized_features = value;
         self
@@ -264,7 +264,7 @@ impl ApiVersionsResponse {
     ///
     /// Set by a KRaft controller if the required configurations for ZK migration are present
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_zk_migration_ready(mut self, value: bool) -> Self {
         self.zk_migration_ready = value;
         self
@@ -536,27 +536,27 @@ impl Default for ApiVersionsResponse {
 }
 
 impl Message for ApiVersionsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FinalizedFeatureKey {
     /// The name of the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub name: StrBytes,
 
     /// The cluster-wide finalized max version level for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub max_version_level: i16,
 
     /// The cluster-wide finalized min version level for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub min_version_level: i16,
 
     /// Other tagged fields
@@ -568,7 +568,7 @@ impl FinalizedFeatureKey {
     ///
     /// The name of the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_name(mut self, value: StrBytes) -> Self {
         self.name = value;
         self
@@ -577,7 +577,7 @@ impl FinalizedFeatureKey {
     ///
     /// The cluster-wide finalized max version level for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_max_version_level(mut self, value: i16) -> Self {
         self.max_version_level = value;
         self
@@ -586,7 +586,7 @@ impl FinalizedFeatureKey {
     ///
     /// The cluster-wide finalized min version level for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_min_version_level(mut self, value: i16) -> Self {
         self.min_version_level = value;
         self
@@ -729,27 +729,27 @@ impl Default for FinalizedFeatureKey {
 }
 
 impl Message for FinalizedFeatureKey {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SupportedFeatureKey {
     /// The name of the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub name: StrBytes,
 
     /// The minimum supported version for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub min_version: i16,
 
     /// The maximum supported version for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub max_version: i16,
 
     /// Other tagged fields
@@ -761,7 +761,7 @@ impl SupportedFeatureKey {
     ///
     /// The name of the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_name(mut self, value: StrBytes) -> Self {
         self.name = value;
         self
@@ -770,7 +770,7 @@ impl SupportedFeatureKey {
     ///
     /// The minimum supported version for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_min_version(mut self, value: i16) -> Self {
         self.min_version = value;
         self
@@ -779,7 +779,7 @@ impl SupportedFeatureKey {
     ///
     /// The maximum supported version for the feature.
     ///
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub fn with_max_version(mut self, value: i16) -> Self {
         self.max_version = value;
         self
@@ -922,7 +922,7 @@ impl Default for SupportedFeatureKey {
 }
 
 impl Message for SupportedFeatureKey {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

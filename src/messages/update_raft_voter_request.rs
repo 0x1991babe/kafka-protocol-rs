@@ -1,6 +1,6 @@
-//! VoteRequest
+//! UpdateRaftVoterRequest
 //!
-//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/VoteRequest.json).
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/UpdateRaftVoterRequest.json).
 // WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
@@ -17,111 +17,41 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct PartitionData {
-    /// The partition index.
+pub struct KRaftVersionFeature {
+    /// The minimum supported KRaft protocol version
     ///
-    /// Supported API versions: 0-1
-    pub partition_index: i32,
+    /// Supported API versions: 0
+    pub min_supported_version: i16,
 
-    /// The bumped epoch of the candidate sending the request
+    /// The maximum supported KRaft protocol version
     ///
-    /// Supported API versions: 0-1
-    pub candidate_epoch: i32,
-
-    /// The replica id of the voter sending the request
-    ///
-    /// Supported API versions: 0-1
-    pub candidate_id: super::BrokerId,
-
-    /// The directory id of the voter sending the request
-    ///
-    /// Supported API versions: 1
-    pub candidate_directory_id: Uuid,
-
-    /// The ID of the voter sending the request
-    ///
-    /// Supported API versions: 1
-    pub voter_directory_id: Uuid,
-
-    /// The epoch of the last record written to the metadata log
-    ///
-    /// Supported API versions: 0-1
-    pub last_offset_epoch: i32,
-
-    /// The offset of the last record written to the metadata log
-    ///
-    /// Supported API versions: 0-1
-    pub last_offset: i64,
+    /// Supported API versions: 0
+    pub max_supported_version: i16,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl PartitionData {
-    /// Sets `partition_index` to the passed value.
+impl KRaftVersionFeature {
+    /// Sets `min_supported_version` to the passed value.
     ///
-    /// The partition index.
+    /// The minimum supported KRaft protocol version
     ///
-    /// Supported API versions: 0-1
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
+    /// Supported API versions: 0
+    pub fn with_min_supported_version(mut self, value: i16) -> Self {
+        self.min_supported_version = value;
         self
     }
-    /// Sets `candidate_epoch` to the passed value.
+    /// Sets `max_supported_version` to the passed value.
     ///
-    /// The bumped epoch of the candidate sending the request
+    /// The maximum supported KRaft protocol version
     ///
-    /// Supported API versions: 0-1
-    pub fn with_candidate_epoch(mut self, value: i32) -> Self {
-        self.candidate_epoch = value;
-        self
-    }
-    /// Sets `candidate_id` to the passed value.
-    ///
-    /// The replica id of the voter sending the request
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_candidate_id(mut self, value: super::BrokerId) -> Self {
-        self.candidate_id = value;
-        self
-    }
-    /// Sets `candidate_directory_id` to the passed value.
-    ///
-    /// The directory id of the voter sending the request
-    ///
-    /// Supported API versions: 1
-    pub fn with_candidate_directory_id(mut self, value: Uuid) -> Self {
-        self.candidate_directory_id = value;
-        self
-    }
-    /// Sets `voter_directory_id` to the passed value.
-    ///
-    /// The ID of the voter sending the request
-    ///
-    /// Supported API versions: 1
-    pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
-        self.voter_directory_id = value;
-        self
-    }
-    /// Sets `last_offset_epoch` to the passed value.
-    ///
-    /// The epoch of the last record written to the metadata log
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_last_offset_epoch(mut self, value: i32) -> Self {
-        self.last_offset_epoch = value;
-        self
-    }
-    /// Sets `last_offset` to the passed value.
-    ///
-    /// The offset of the last record written to the metadata log
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_last_offset(mut self, value: i64) -> Self {
-        self.last_offset = value;
+    /// Supported API versions: 0
+    pub fn with_max_supported_version(mut self, value: i16) -> Self {
+        self.max_supported_version = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -137,19 +67,10 @@ impl PartitionData {
 }
 
 #[cfg(feature = "client")]
-impl Encodable for PartitionData {
+impl Encodable for KRaftVersionFeature {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int32.encode(buf, &self.candidate_epoch)?;
-        types::Int32.encode(buf, &self.candidate_id)?;
-        if version >= 1 {
-            types::Uuid.encode(buf, &self.candidate_directory_id)?;
-        }
-        if version >= 1 {
-            types::Uuid.encode(buf, &self.voter_directory_id)?;
-        }
-        types::Int32.encode(buf, &self.last_offset_epoch)?;
-        types::Int64.encode(buf, &self.last_offset)?;
+        types::Int16.encode(buf, &self.min_supported_version)?;
+        types::Int16.encode(buf, &self.max_supported_version)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -164,17 +85,8 @@ impl Encodable for PartitionData {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int32.compute_size(&self.candidate_epoch)?;
-        total_size += types::Int32.compute_size(&self.candidate_id)?;
-        if version >= 1 {
-            total_size += types::Uuid.compute_size(&self.candidate_directory_id)?;
-        }
-        if version >= 1 {
-            total_size += types::Uuid.compute_size(&self.voter_directory_id)?;
-        }
-        total_size += types::Int32.compute_size(&self.last_offset_epoch)?;
-        total_size += types::Int64.compute_size(&self.last_offset)?;
+        total_size += types::Int16.compute_size(&self.min_supported_version)?;
+        total_size += types::Int16.compute_size(&self.max_supported_version)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -190,23 +102,10 @@ impl Encodable for PartitionData {
 }
 
 #[cfg(feature = "broker")]
-impl Decodable for PartitionData {
+impl Decodable for KRaftVersionFeature {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        let partition_index = types::Int32.decode(buf)?;
-        let candidate_epoch = types::Int32.decode(buf)?;
-        let candidate_id = types::Int32.decode(buf)?;
-        let candidate_directory_id = if version >= 1 {
-            types::Uuid.decode(buf)?
-        } else {
-            Uuid::nil()
-        };
-        let voter_directory_id = if version >= 1 {
-            types::Uuid.decode(buf)?
-        } else {
-            Uuid::nil()
-        };
-        let last_offset_epoch = types::Int32.decode(buf)?;
-        let last_offset = types::Int64.decode(buf)?;
+        let min_supported_version = types::Int16.decode(buf)?;
+        let max_supported_version = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -216,73 +115,77 @@ impl Decodable for PartitionData {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            partition_index,
-            candidate_epoch,
-            candidate_id,
-            candidate_directory_id,
-            voter_directory_id,
-            last_offset_epoch,
-            last_offset,
+            min_supported_version,
+            max_supported_version,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for PartitionData {
+impl Default for KRaftVersionFeature {
     fn default() -> Self {
         Self {
-            partition_index: 0,
-            candidate_epoch: 0,
-            candidate_id: (0).into(),
-            candidate_directory_id: Uuid::nil(),
-            voter_directory_id: Uuid::nil(),
-            last_offset_epoch: 0,
-            last_offset: 0,
+            min_supported_version: 0,
+            max_supported_version: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+impl Message for KRaftVersionFeature {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct TopicData {
-    /// The topic name.
+pub struct Listener {
+    /// The name of the endpoint
     ///
-    /// Supported API versions: 0-1
-    pub topic_name: super::TopicName,
+    /// Supported API versions: 0
+    pub name: StrBytes,
 
+    /// The hostname
     ///
+    /// Supported API versions: 0
+    pub host: StrBytes,
+
+    /// The port
     ///
-    /// Supported API versions: 0-1
-    pub partitions: Vec<PartitionData>,
+    /// Supported API versions: 0
+    pub port: u16,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl TopicData {
-    /// Sets `topic_name` to the passed value.
+impl Listener {
+    /// Sets `name` to the passed value.
     ///
-    /// The topic name.
+    /// The name of the endpoint
     ///
-    /// Supported API versions: 0-1
-    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
-        self.topic_name = value;
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
         self
     }
-    /// Sets `partitions` to the passed value.
+    /// Sets `host` to the passed value.
     ///
+    /// The hostname
     ///
+    /// Supported API versions: 0
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `port` to the passed value.
     ///
-    /// Supported API versions: 0-1
-    pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
-        self.partitions = value;
+    /// The port
+    ///
+    /// Supported API versions: 0
+    pub fn with_port(mut self, value: u16) -> Self {
+        self.port = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -298,10 +201,11 @@ impl TopicData {
 }
 
 #[cfg(feature = "client")]
-impl Encodable for TopicData {
+impl Encodable for Listener {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, &self.topic_name)?;
-        types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
+        types::CompactString.encode(buf, &self.name)?;
+        types::CompactString.encode(buf, &self.host)?;
+        types::UInt16.encode(buf, &self.port)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -316,9 +220,9 @@ impl Encodable for TopicData {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(&self.topic_name)?;
-        total_size +=
-            types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+        total_size += types::CompactString.compute_size(&self.name)?;
+        total_size += types::CompactString.compute_size(&self.host)?;
+        total_size += types::UInt16.compute_size(&self.port)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -334,10 +238,11 @@ impl Encodable for TopicData {
 }
 
 #[cfg(feature = "broker")]
-impl Decodable for TopicData {
+impl Decodable for Listener {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        let topic_name = types::CompactString.decode(buf)?;
-        let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
+        let name = types::CompactString.decode(buf)?;
+        let host = types::CompactString.decode(buf)?;
+        let port = types::UInt16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -347,77 +252,121 @@ impl Decodable for TopicData {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            topic_name,
-            partitions,
+            name,
+            host,
+            port,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for TopicData {
+impl Default for Listener {
     fn default() -> Self {
         Self {
-            topic_name: Default::default(),
-            partitions: Default::default(),
+            name: Default::default(),
+            host: Default::default(),
+            port: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+impl Message for Listener {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct VoteRequest {
+pub struct UpdateRaftVoterRequest {
     ///
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0
     pub cluster_id: Option<StrBytes>,
 
-    /// The replica id of the voter receiving the request
+    /// The current leader epoch of the partition, -1 for unknown leader epoch
     ///
-    /// Supported API versions: 1
-    pub voter_id: super::BrokerId,
+    /// Supported API versions: 0
+    pub current_leader_epoch: i32,
 
+    /// The replica id of the voter getting updated in the topic partition
     ///
+    /// Supported API versions: 0
+    pub voter_id: i32,
+
+    /// The directory id of the voter getting updated in the topic partition
     ///
-    /// Supported API versions: 0-1
-    pub topics: Vec<TopicData>,
+    /// Supported API versions: 0
+    pub voter_directory_id: Uuid,
+
+    /// The endpoint that can be used to communicate with the leader
+    ///
+    /// Supported API versions: 0
+    pub listeners: Vec<Listener>,
+
+    /// The range of versions of the protocol that the replica supports
+    ///
+    /// Supported API versions: 0
+    pub k_raft_version_feature: KRaftVersionFeature,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl VoteRequest {
+impl UpdateRaftVoterRequest {
     /// Sets `cluster_id` to the passed value.
     ///
     ///
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
         self.cluster_id = value;
         self
     }
+    /// Sets `current_leader_epoch` to the passed value.
+    ///
+    /// The current leader epoch of the partition, -1 for unknown leader epoch
+    ///
+    /// Supported API versions: 0
+    pub fn with_current_leader_epoch(mut self, value: i32) -> Self {
+        self.current_leader_epoch = value;
+        self
+    }
     /// Sets `voter_id` to the passed value.
     ///
-    /// The replica id of the voter receiving the request
+    /// The replica id of the voter getting updated in the topic partition
     ///
-    /// Supported API versions: 1
-    pub fn with_voter_id(mut self, value: super::BrokerId) -> Self {
+    /// Supported API versions: 0
+    pub fn with_voter_id(mut self, value: i32) -> Self {
         self.voter_id = value;
         self
     }
-    /// Sets `topics` to the passed value.
+    /// Sets `voter_directory_id` to the passed value.
     ///
+    /// The directory id of the voter getting updated in the topic partition
     ///
+    /// Supported API versions: 0
+    pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
+        self.voter_directory_id = value;
+        self
+    }
+    /// Sets `listeners` to the passed value.
     ///
-    /// Supported API versions: 0-1
-    pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
-        self.topics = value;
+    /// The endpoint that can be used to communicate with the leader
+    ///
+    /// Supported API versions: 0
+    pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
+        self.listeners = value;
+        self
+    }
+    /// Sets `k_raft_version_feature` to the passed value.
+    ///
+    /// The range of versions of the protocol that the replica supports
+    ///
+    /// Supported API versions: 0
+    pub fn with_k_raft_version_feature(mut self, value: KRaftVersionFeature) -> Self {
+        self.k_raft_version_feature = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -433,13 +382,14 @@ impl VoteRequest {
 }
 
 #[cfg(feature = "client")]
-impl Encodable for VoteRequest {
+impl Encodable for UpdateRaftVoterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.cluster_id)?;
-        if version >= 1 {
-            types::Int32.encode(buf, &self.voter_id)?;
-        }
-        types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
+        types::Int32.encode(buf, &self.current_leader_epoch)?;
+        types::Int32.encode(buf, &self.voter_id)?;
+        types::Uuid.encode(buf, &self.voter_directory_id)?;
+        types::CompactArray(types::Struct { version }).encode(buf, &self.listeners)?;
+        types::Struct { version }.encode(buf, &self.k_raft_version_feature)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -455,10 +405,12 @@ impl Encodable for VoteRequest {
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.cluster_id)?;
-        if version >= 1 {
-            total_size += types::Int32.compute_size(&self.voter_id)?;
-        }
-        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+        total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
+        total_size += types::Int32.compute_size(&self.voter_id)?;
+        total_size += types::Uuid.compute_size(&self.voter_directory_id)?;
+        total_size +=
+            types::CompactArray(types::Struct { version }).compute_size(&self.listeners)?;
+        total_size += types::Struct { version }.compute_size(&self.k_raft_version_feature)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -474,15 +426,14 @@ impl Encodable for VoteRequest {
 }
 
 #[cfg(feature = "broker")]
-impl Decodable for VoteRequest {
+impl Decodable for UpdateRaftVoterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let cluster_id = types::CompactString.decode(buf)?;
-        let voter_id = if version >= 1 {
-            types::Int32.decode(buf)?
-        } else {
-            (-1).into()
-        };
-        let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
+        let current_leader_epoch = types::Int32.decode(buf)?;
+        let voter_id = types::Int32.decode(buf)?;
+        let voter_directory_id = types::Uuid.decode(buf)?;
+        let listeners = types::CompactArray(types::Struct { version }).decode(buf)?;
+        let k_raft_version_feature = types::Struct { version }.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -493,30 +444,36 @@ impl Decodable for VoteRequest {
         }
         Ok(Self {
             cluster_id,
+            current_leader_epoch,
             voter_id,
-            topics,
+            voter_directory_id,
+            listeners,
+            k_raft_version_feature,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for VoteRequest {
+impl Default for UpdateRaftVoterRequest {
     fn default() -> Self {
         Self {
-            cluster_id: None,
-            voter_id: (-1).into(),
-            topics: Default::default(),
+            cluster_id: Some(Default::default()),
+            current_leader_epoch: 0,
+            voter_id: 0,
+            voter_directory_id: Uuid::nil(),
+            listeners: Default::default(),
+            k_raft_version_feature: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for VoteRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+impl Message for UpdateRaftVoterRequest {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-impl HeaderVersion for VoteRequest {
+impl HeaderVersion for UpdateRaftVoterRequest {
     fn header_version(version: i16) -> i16 {
         2
     }

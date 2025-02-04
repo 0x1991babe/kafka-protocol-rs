@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-8
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsPartitionResponse {
     /// The partition index.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub partition_index: i32,
 
     /// The partition error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub error_code: i16,
 
     /// The result offsets.
@@ -38,17 +38,17 @@ pub struct ListOffsetsPartitionResponse {
 
     /// The timestamp associated with the returned offset.
     ///
-    /// Supported API versions: 1-8
+    /// Supported API versions: 1-9
     pub timestamp: i64,
 
     /// The returned offset.
     ///
-    /// Supported API versions: 1-8
+    /// Supported API versions: 1-9
     pub offset: i64,
 
     ///
     ///
-    /// Supported API versions: 4-8
+    /// Supported API versions: 4-9
     pub leader_epoch: i32,
 
     /// Other tagged fields
@@ -60,7 +60,7 @@ impl ListOffsetsPartitionResponse {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -69,7 +69,7 @@ impl ListOffsetsPartitionResponse {
     ///
     /// The partition error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -87,7 +87,7 @@ impl ListOffsetsPartitionResponse {
     ///
     /// The timestamp associated with the returned offset.
     ///
-    /// Supported API versions: 1-8
+    /// Supported API versions: 1-9
     pub fn with_timestamp(mut self, value: i64) -> Self {
         self.timestamp = value;
         self
@@ -96,7 +96,7 @@ impl ListOffsetsPartitionResponse {
     ///
     /// The returned offset.
     ///
-    /// Supported API versions: 1-8
+    /// Supported API versions: 1-9
     pub fn with_offset(mut self, value: i64) -> Self {
         self.offset = value;
         self
@@ -105,7 +105,7 @@ impl ListOffsetsPartitionResponse {
     ///
     ///
     ///
-    /// Supported API versions: 4-8
+    /// Supported API versions: 4-9
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
         self.leader_epoch = value;
         self
@@ -279,22 +279,22 @@ impl Default for ListOffsetsPartitionResponse {
 }
 
 impl Message for ListOffsetsPartitionResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-8
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 2-8
+    /// Supported API versions: 2-9
     pub throttle_time_ms: i32,
 
     /// Each topic in the response.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub topics: Vec<ListOffsetsTopicResponse>,
 
     /// Other tagged fields
@@ -306,7 +306,7 @@ impl ListOffsetsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 2-8
+    /// Supported API versions: 2-9
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -315,7 +315,7 @@ impl ListOffsetsResponse {
     ///
     /// Each topic in the response.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_topics(mut self, value: Vec<ListOffsetsTopicResponse>) -> Self {
         self.topics = value;
         self
@@ -426,22 +426,22 @@ impl Default for ListOffsetsResponse {
 }
 
 impl Message for ListOffsetsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-8
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsTopicResponse {
     /// The topic name
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub name: super::TopicName,
 
     /// Each partition in the response.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub partitions: Vec<ListOffsetsPartitionResponse>,
 
     /// Other tagged fields
@@ -453,7 +453,7 @@ impl ListOffsetsTopicResponse {
     ///
     /// The topic name
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -462,7 +462,7 @@ impl ListOffsetsTopicResponse {
     ///
     /// Each partition in the response.
     ///
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-9
     pub fn with_partitions(mut self, value: Vec<ListOffsetsPartitionResponse>) -> Self {
         self.partitions = value;
         self
@@ -577,7 +577,7 @@ impl Default for ListOffsetsTopicResponse {
 }
 
 impl Message for ListOffsetsTopicResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

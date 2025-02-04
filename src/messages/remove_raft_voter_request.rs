@@ -1,6 +1,6 @@
-//! BrokerRegistrationResponse
+//! RemoveRaftVoterRequest
 //!
-//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/BrokerRegistrationResponse.json).
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/RemoveRaftVoterRequest.json).
 // WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
@@ -17,55 +17,55 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct BrokerRegistrationResponse {
-    /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+pub struct RemoveRaftVoterRequest {
     ///
-    /// Supported API versions: 0-4
-    pub throttle_time_ms: i32,
+    ///
+    /// Supported API versions: 0
+    pub cluster_id: Option<StrBytes>,
 
-    /// The error code, or 0 if there was no error.
+    /// The replica id of the voter getting removed from the topic partition
     ///
-    /// Supported API versions: 0-4
-    pub error_code: i16,
+    /// Supported API versions: 0
+    pub voter_id: i32,
 
-    /// The broker's assigned epoch, or -1 if none was assigned.
+    /// The directory id of the voter getting removed from the topic partition
     ///
-    /// Supported API versions: 0-4
-    pub broker_epoch: i64,
+    /// Supported API versions: 0
+    pub voter_directory_id: Uuid,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl BrokerRegistrationResponse {
-    /// Sets `throttle_time_ms` to the passed value.
+impl RemoveRaftVoterRequest {
+    /// Sets `cluster_id` to the passed value.
     ///
-    /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
+    ///
+    /// Supported API versions: 0
+    pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
+        self.cluster_id = value;
         self
     }
-    /// Sets `error_code` to the passed value.
+    /// Sets `voter_id` to the passed value.
     ///
-    /// The error code, or 0 if there was no error.
+    /// The replica id of the voter getting removed from the topic partition
     ///
-    /// Supported API versions: 0-4
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
+    /// Supported API versions: 0
+    pub fn with_voter_id(mut self, value: i32) -> Self {
+        self.voter_id = value;
         self
     }
-    /// Sets `broker_epoch` to the passed value.
+    /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The broker's assigned epoch, or -1 if none was assigned.
+    /// The directory id of the voter getting removed from the topic partition
     ///
-    /// Supported API versions: 0-4
-    pub fn with_broker_epoch(mut self, value: i64) -> Self {
-        self.broker_epoch = value;
+    /// Supported API versions: 0
+    pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
+        self.voter_directory_id = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -80,12 +80,12 @@ impl BrokerRegistrationResponse {
     }
 }
 
-#[cfg(feature = "broker")]
-impl Encodable for BrokerRegistrationResponse {
+#[cfg(feature = "client")]
+impl Encodable for RemoveRaftVoterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Int64.encode(buf, &self.broker_epoch)?;
+        types::CompactString.encode(buf, &self.cluster_id)?;
+        types::Int32.encode(buf, &self.voter_id)?;
+        types::Uuid.encode(buf, &self.voter_directory_id)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -100,9 +100,9 @@ impl Encodable for BrokerRegistrationResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Int64.compute_size(&self.broker_epoch)?;
+        total_size += types::CompactString.compute_size(&self.cluster_id)?;
+        total_size += types::Int32.compute_size(&self.voter_id)?;
+        total_size += types::Uuid.compute_size(&self.voter_directory_id)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -117,12 +117,12 @@ impl Encodable for BrokerRegistrationResponse {
     }
 }
 
-#[cfg(feature = "client")]
-impl Decodable for BrokerRegistrationResponse {
+#[cfg(feature = "broker")]
+impl Decodable for RemoveRaftVoterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
-        let broker_epoch = types::Int64.decode(buf)?;
+        let cluster_id = types::CompactString.decode(buf)?;
+        let voter_id = types::Int32.decode(buf)?;
+        let voter_directory_id = types::Uuid.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -132,32 +132,32 @@ impl Decodable for BrokerRegistrationResponse {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            throttle_time_ms,
-            error_code,
-            broker_epoch,
+            cluster_id,
+            voter_id,
+            voter_directory_id,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for BrokerRegistrationResponse {
+impl Default for RemoveRaftVoterRequest {
     fn default() -> Self {
         Self {
-            throttle_time_ms: 0,
-            error_code: 0,
-            broker_epoch: -1,
+            cluster_id: Some(Default::default()),
+            voter_id: 0,
+            voter_directory_id: Uuid::nil(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for BrokerRegistrationResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+impl Message for RemoveRaftVoterRequest {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-impl HeaderVersion for BrokerRegistrationResponse {
+impl HeaderVersion for RemoveRaftVoterRequest {
     fn header_version(version: i16) -> i16 {
-        1
+        2
     }
 }
